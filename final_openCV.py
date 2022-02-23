@@ -30,13 +30,10 @@ def detact_navigation_object (img):
 trafficconeTemplate1 = cv2.imread(".\\Cone\\1.png")
 
 
-
-
-#trafficconeTemplate = cv2.cvtColor[trafficconeTemplate1,trafficconeTemplate2,trafficconeTemplate3,trafficconeTemplate4,trafficconeTemplate5,trafficconeTemplate6,trafficconeTemplate7,trafficconeTemplate8,trafficconeTemplate9,trafficconeTemplate10,trafficconeTemplate11,cv2.COLOR_BGR2HSV]
 trafficconeTemplate = cv2.cvtColor(trafficconeTemplate1,cv2.COLOR_BGR2HSV)
 trafficconeTemplate = cv2.inRange(trafficconeTemplate,lower,upper)
 
-# cv2.imshow('im',trafficconeTemplate)
+# cv2.imshow('trafficconeTemplate',trafficconeTemplate)
 
 h, w = trafficconeTemplate.shape
 
@@ -47,7 +44,6 @@ for scint in range(100,50,-50):
     for stemp in SignTemplates:
         AllSigns.append(cv2.resize(stemp,(int(64*scale),int(64*scale))))
 
-# h, w = TrafficconeTemplate1.shape
 
 TemplateToString = {0:"Trafficcone"}
 TemplateThreshold = 0.69
@@ -109,6 +105,8 @@ def GetSignSingle(imgframe):
 
         
 
+
+
 cap = cv2.VideoCapture(0)
 img = cv2.imread(".\\image\\safezone_val.jpeg")
 
@@ -120,9 +118,6 @@ ret, frame = cap.read()
 #บันทึกวิดีโอ
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # output = cv2.VideoWriter('newvideo7.mp4',fourcc,20.0,(640,480)) 
-
-# def ref_path(a,b):
-#     return b - 2.7826*a + 558.17
     
 
 hw,hh=(200,200)
@@ -132,8 +127,6 @@ center_memory=np.zeros((memory,2))
 memory_i=0
 
 while ret:
-    
-    
 
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     lower = np.array([22,0,0])
@@ -150,8 +143,7 @@ while ret:
     (template, top_left, scale, val) = GetSignSingle(frame)
 
     if template != -1:
-        # bottom_right = (top_left[0] + int(64*scale), top_left[1] + int(64*scale))
-        
+       
         res = cv2.matchTemplate(detest, trafficconeTemplate, cv2.TM_CCOEFF)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         top_left = max_loc
@@ -162,25 +154,9 @@ while ret:
             center_memory[memory_i]=center_match
             center_match=np.median(center_memory,axis=0).astype(np.int16)
             memory_i=(memory_i+1)%memory
-            # direction=ref_path(center_match[0], center_match[1])
-            # print()
             
-            # if direction>0:
-                # frame[:,frame.shape[1]-50:frame.shape[1]-1]=(0,145,255)
-                # cv2.putText(frame,"right",(20,450),cv2.FONT_HERSHEY_SIMPLEX,2,(0,255,0),2)
-               
-            # if direction<0:   
-            #     frame[:,frame.shape[1]-50:frame.shape[1]-1]=(39,255,255)
-
-            #     cv2.putText(frame,"lift",(20,300),cv2.FONT_HERSHEY_SIMPLEX,2,(0,255,0),2)
-                # cv2.putText(frame,str(center_match),(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,255,0),2)
-
-            # if direction>=0:   
-            #     frame[:,frame.shape[1]-50:frame.shape[1]-1]=(255,0,0)
-
-            #     cv2.putText(frame,"Top",(20,300),cv2.FONT_HERSHEY_SIMPLEX,2,(0,255,0),2)
-            #     cv2.putText(frame,str(center_match),(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,255,0),2)    
             
+            #Safe zone บนภาพวาด
             safezone_val = img[center_match[0], center_match[1]]
             if safezone_val > 200 : 
                 cv2.putText(frame,'turn_left',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
@@ -188,8 +164,6 @@ while ret:
             elif safezone_val < 100 :
                 cv2.putText(frame,'turn_Right',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
                 turn_Right()
-
-
             else :
                 cv2.putText(frame,'direct',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
                 print("direct")
@@ -197,9 +171,9 @@ while ret:
 
 
             print(center_match)
-
             print(img[center_match[0], center_match[1]])
 
+            #Safe zoon บนจอภาพ
             safezone_val = img[center_match[0], center_match[1]]
             if safezone_val > 200 : 
                 cv2.putText(copyimg,'turn_left',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
@@ -207,11 +181,10 @@ while ret:
             elif safezone_val < 100 :
                 cv2.putText(copyimg,'turn_Right',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
                 turn_Right()
-
-
             else :
                 cv2.putText(copyimg,'direct',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
                 print("ตรงไป")
+
 
         frame[center_match[0]:center_match[0]+10,center_match[1]:center_match[1]+10]=255
 
@@ -219,12 +192,10 @@ while ret:
 
         copyimg[center_match[0]:center_match[0]+10,center_match[1]:center_match[1]+10]=100
 
-        # cv2.rectangle(frame,top_left, bottom_right, 255, 2)
-        cv2.rectangle(frame, top_left, bottom_right, (0, 0, 255), 3)
         
         # cv2.putText(frame,str(val),(20,300),cv2.FONT_HERSHEY_SIMPLEX,2,(0,255,0),2)
         # cv2.putText(frame,str(center_match),(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
-        
+        cv2.rectangle(frame, top_left, bottom_right, (0, 0, 255), 3)
         cv2.putText(frame,TemplateToString[template],(20,400),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,0),2)
 
 
@@ -234,7 +205,6 @@ while ret:
     
     
     #print(center_match)
-
     # print(res.shape)
     # print(frame.shape)
     # print(trafficconeTemplate.shape)
@@ -248,13 +218,9 @@ while ret:
     cv2.imshow("Original",frame)
     cv2.imshow("Img",copyimg)
     # cv2.imshow('Frame2',frame[focus[1]-hh:focus[1]+hh,focus[0]-hw:focus[0]+hw,:])
-    
     # cv2.imshow('Detest Result',detest)
+    
     ret, frame = cap.read()
-
-   
-
-
     
     if cv2.waitKey(1) & 0xFF== ord('q'):
                 break
