@@ -16,12 +16,13 @@ def turn_left ():
 
 def turn_Right ():
     print ("turnRight")
+    
+def direct ():
+    print ("direct")
 
 def stop ():
     print ("Stop")
 
-def direct ():
-    print ("direct")
 
 
 def detact_navigation_object (img):
