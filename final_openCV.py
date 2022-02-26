@@ -24,7 +24,6 @@ def stop ():
     print ("Stop")
 
 
-
 def detact_navigation_object (img):
     return 
 
