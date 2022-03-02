@@ -2,10 +2,10 @@ import cv2
 import numpy as np
 import threading
 import time
-
 from numpy.core.fromnumeric import put
-
 # from matplotlib import pyplot as plt
+
+
 
 lower = np.array([22,0,0])
 upper = np.array([38,255,255])
@@ -108,7 +108,7 @@ def GetSignSingle(imgframe):
 
 
 cap = cv2.VideoCapture(0)
-img = cv2.imread(".\\image\\safezone_val.jpeg")
+img = cv2.imread(".\\image\\safezone_val2.jpg")
 
 img = cv2.cvtColor(img,cv2.COLOR_BGRA2GRAY)
 
@@ -127,7 +127,6 @@ center_memory=np.zeros((memory,2))
 memory_i=0
 
 while ret:
-
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     lower = np.array([22,0,0])
     upper = np.array([38,255,255])
@@ -159,13 +158,13 @@ while ret:
             #Safe zone บนภาพวาด
             safezone_val = img[center_match[0], center_match[1]]
             if safezone_val > 200 : 
-                cv2.putText(frame,'turn_left',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
+                cv2.putText(frame,'Turn_left',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
                 turn_left()
             elif safezone_val < 100 :
-                cv2.putText(frame,'turn_Right',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
+                cv2.putText(frame,'Turn_Right',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
                 turn_Right()
             else :
-                cv2.putText(frame,'direct',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
+                cv2.putText(frame,'Direct',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
                 print("direct")
 
 
@@ -176,14 +175,17 @@ while ret:
             #Safe zoon บนจอภาพ
             safezone_val = img[center_match[0], center_match[1]]
             if safezone_val > 200 : 
-                cv2.putText(copyimg,'turn_left',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
+                cv2.putText(copyimg,'Turn_left',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
                 turn_left()
             elif safezone_val < 100 :
-                cv2.putText(copyimg,'turn_Right',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
+                cv2.putText(copyimg,'Turn_Right',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
                 turn_Right()
+            # elif safezone_val < 100 :
+            #     cv2.putText(copyimg,'stop',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
+            #     stop()
             else :
-                cv2.putText(copyimg,'direct',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
-                print("ตรงไป")
+                cv2.putText(copyimg,'Direct',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
+                print("direct")
 
 
         frame[center_match[0]:center_match[0]+10,center_match[1]:center_match[1]+10]=255
@@ -226,8 +228,7 @@ while ret:
                 break
 
     #บันทึกวิดีโอ
-# cap.release()
-
+cap.release()
 cv2.destroyAllWindows
 
 
