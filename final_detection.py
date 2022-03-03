@@ -5,6 +5,15 @@ import time
 from numpy.core.fromnumeric import put
 # from matplotlib import pyplot as plt
 
+#รายชื่อหมวดหมู่ทั้งหมด เรียงตามลำดับ
+CLASSES = ["BACKGROUND", "AEROPLANE", "BICYCLE", "BIRD", "BOAT",
+	"BOTTLE", "BUS", "CAR", "CAT", "CHAIR", "COW", "DININGTABLE",
+	"DOG", "HORSE", "MOTORBIKE", "PERSON", "POTTEDPLANT", "SHEEP",
+	"SOFA", "TRAIN", "TVMONITOR"]
+#สีตัวกรอบที่วาดrandomใหม่ทุกครั้ง
+COLORS = np.random.uniform(0,100, size=(len(CLASSES), 3))
+#โหลดmodelจากแฟ้ม
+net = cv2.dnn.readNetFromCaffe("./MobileNetSSD/MobileNetSSD.prototxt","./MobileNetSSD/MobileNetSSD.caffemodel")
 
 
 lower = np.array([22,0,0])
@@ -14,7 +23,7 @@ upper = np.array([38,255,255])
 def turn_left ():
     print ("turnleft")
 
-def turn_Right ():
+def turn_right ():
     print ("turnRight")
     
 def direct ():
@@ -107,18 +116,41 @@ def GetSignSingle(imgframe):
 
 
 
-cap = cv2.VideoCapture(0)
-img = cv2.imread(".\\image\\safezone_val2.jpg")
-
+cap = cv2.VideoCapture(1)
+img = cv2.imread(".\\image\\safezone_val3.png")
 img = cv2.cvtColor(img,cv2.COLOR_BGRA2GRAY)
-
-
 ret, frame = cap.read()
 
 #บันทึกวิดีโอ
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # output = cv2.VideoWriter('newvideo7.mp4',fourcc,20.0,(640,480)) 
-    
+
+# def detection_func():
+#     while True:
+# 	#เริ่มอ่านในแต่ละเฟรม
+#         ret, frame = cap.read()
+#         if ret:
+#             (h,w) = frame.shape[:2]
+#             #ทำpreprocessing
+#             blob = cv2.dnn.blobFromImage(frame, 0.007843, (300,300), 127.5)
+#             net.setInput(blob)
+#             #feedเข้าmodelพร้อมได้ผลลัพธ์ทั้งหมดเก็บมาในตัวแปร detections
+#             detections = net.forward()
+
+#             for i in np.arange(0, detections.shape[2]):
+#                 percent = detections[0,0,i,2]
+#                 #กรองเอาเฉพาะค่าpercentที่สูงกว่า0.5 เพิ่มลดได้ตามต้องการ
+#                 if percent > 0.5:
+#                     class_index = int(detections[0,0,i,1])
+#                     box = detections[0,0,i,3:7]*np.array([w,h,w,h])
+#                     (startX, startY, endX, endY) = box.astype("int")
+#                 #ส่วนตกแต่งสามารถลองแก้กันได้ วาดกรอบและชื่อ
+#                     label = "{} [{:.2f}%]".format(CLASSES[class_index], percent*100)
+#                     cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[class_index], 2)
+#                     cv2.rectangle(frame, (startX-1, startY-30), (endX+1, startY), COLORS[class_index], cv2.FILLED)
+#                     y = startY - 15 if startY-15>15 else startY+15
+#                     cv2.putText(frame, label, (startX+20, y+5), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255,255,255), 1)
+#         break
 
 hw,hh=(200,200)
 focus=(800,500)
@@ -128,7 +160,6 @@ memory_i=0
 
 while ret:
     
-
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     lower = np.array([22,0,0])
     upper = np.array([38,255,255])
@@ -137,11 +168,31 @@ while ret:
 
     copyimg = img.copy()
 
-    if not ret:
-        break
+    # if not ret:
+    #     break
+    if ret:
+        (h,w) = frame.shape[:2]
+        #ทำpreprocessing
+        blob = cv2.dnn.blobFromImage(frame, 0.007843, (300,300), 127.5)
+        net.setInput(blob)
+        #feedเข้าmodelพร้อมได้ผลลัพธ์ทั้งหมดเก็บมาในตัวแปร detections
+        detections = net.forward()
+
+        for i in np.arange(0, detections.shape[2]):
+            percent = detections[0,0,i,2]
+            #กรองเอาเฉพาะค่าpercentที่สูงกว่า0.5 เพิ่มลดได้ตามต้องการ
+            if percent > 0.5:
+                class_index = int(detections[0,0,i,1])
+                box = detections[0,0,i,3:7]*np.array([w,h,w,h])
+                (startX, startY, endX, endY) = box.astype("int")
+            #ส่วนตกแต่งสามารถลองแก้กันได้ วาดกรอบและชื่อ
+                label = "{} [{:.2f}%]".format(CLASSES[class_index], percent*100)
+                cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[class_index], 2)
+                cv2.rectangle(frame, (startX-1, startY-30), (endX+1, startY), COLORS[class_index], cv2.FILLED)
+                y = startY - 15 if startY-15>15 else startY+15
+                cv2.putText(frame, label, (startX+20, y+5), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255,255,255), 1)
+
     template=-1
-    
-    
     (template, top_left, scale, val) = GetSignSingle(frame)
 
     if template != -1:
@@ -158,48 +209,45 @@ while ret:
             memory_i=(memory_i+1)%memory
             
             
-            #Safe zone บนภาพวาด
+            #Safe zone บนจอวาด
             safezone_val = img[center_match[0], center_match[1]]
             if safezone_val > 200 : 
-                cv2.putText(frame,'Turn_left',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
+                cv2.putText(frame,'Turn_left',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,255),2)
                 turn_left()
             elif safezone_val < 100 :
-                cv2.putText(frame,'Turn_Right',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
-                turn_Right()
+                cv2.putText(frame,'Turn_Right',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,255),2)
+                turn_right()
+            # elif ret :
+            #     cv2.putText(copyimg,'stop',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,255),2)
+            #     stop()
             else :
-                cv2.putText(frame,'Direct',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,0),2)
+                cv2.putText(frame,'Direct',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,255),2)
                 print("direct")
-
 
 
             print(center_match)
             print(img[center_match[0], center_match[1]])
 
-            #Safe zoon บนจอภาพ
+            #Safe zoon บนภาพวาด
             safezone_val = img[center_match[0], center_match[1]]
             if safezone_val > 200 : 
-                cv2.putText(copyimg,'Turn_left',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
+                cv2.putText(copyimg,'Turn_left',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,255),2)
                 turn_left()
             elif safezone_val < 100 :
-                cv2.putText(copyimg,'Turn_Right',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
-                turn_Right()
-            # elif safezone_val < 100 :
-            #     cv2.putText(copyimg,'stop',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
+                cv2.putText(copyimg,'Turn_Right',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,255),2)
+                turn_right()
+            # elif ret :
+            #     cv2.putText(copyimg,'stop',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,255),2)
             #     stop()
             else :
-                cv2.putText(copyimg,'Direct',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
+                cv2.putText(copyimg,'Direct',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,255),2)
                 print("direct")
 
-
+    
         frame[center_match[0]:center_match[0]+10,center_match[1]:center_match[1]+10]=255
-
-        
-
         copyimg[center_match[0]:center_match[0]+10,center_match[1]:center_match[1]+10]=100
 
         
-        # cv2.putText(frame,str(val),(20,300),cv2.FONT_HERSHEY_SIMPLEX,2,(0,255,0),2)
-        # cv2.putText(frame,str(center_match),(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,0),2)
         cv2.rectangle(frame, top_left, bottom_right, (0, 0, 255), 3)
         cv2.putText(frame,TemplateToString[template],(20,400),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,0),2)
 
@@ -208,22 +256,8 @@ while ret:
     # if(ret==True):
     #     output.write(frame)
     
-    
-    #print(center_match)
-    # print(res.shape)
-    # print(frame.shape)
-    # print(trafficconeTemplate.shape)
-    # print([min_val, max_val, min_loc, max_loc])
-    # detest = cv2.cvtColor(detest,cv2.COLOR_)
-
-    # cv2.rectangle(frame, top_left, bottom_right, (0, 0, 255), 3)
-
-    #cv2.imshow("Crop",frame[270:480,200:420,:])
-    #cv2.imshow("Result",res)
     cv2.imshow("Original",frame)
     cv2.imshow("Img",copyimg)
-    # cv2.imshow('Frame2',frame[focus[1]-hh:focus[1]+hh,focus[0]-hw:focus[0]+hw,:])
-    # cv2.imshow('Detest Result',detest)
     
     ret, frame = cap.read()
     
