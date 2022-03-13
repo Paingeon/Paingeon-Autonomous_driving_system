@@ -1,4 +1,6 @@
+from array import array
 import cv2
+from cv2 import imshow
 import numpy as np
 import threading
 import time
@@ -116,7 +118,7 @@ def GetSignSingle(imgframe):
 
 
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 img = cv2.imread(".\\image\\safezone_val3.png")
 img = cv2.cvtColor(img,cv2.COLOR_BGRA2GRAY)
 ret, frame = cap.read()
@@ -180,22 +182,39 @@ while ret:
 
         for i in np.arange(0, detections.shape[2]):
             percent = detections[0,0,i,2]
-            #กรองเอาเฉพาะค่าpercentที่สูงกว่า0.5 เพิ่มลดได้ตามต้องการ
+            #กรองเอาเฉพาะค่าpercentที่สูงกว่า0.5 
             if percent > 0.5:
                 class_index = int(detections[0,0,i,1])
                 box = detections[0,0,i,3:7]*np.array([w,h,w,h])
                 (startX, startY, endX, endY) = box.astype("int")
-            #ส่วนตกแต่งสามารถลองแก้กันได้ วาดกรอบและชื่อ
+                
+                aruyo = frame[startX:endY, startY:endX]
+                
+                cv2.imshow("person",aruyo)
+                
+                # cv2.imshow(frame[box.astype("int")])
+                # cv2.imshow(frame(box.astype("int")))
+                # aruyo = frame[[startX, startY], [endX, endY]]
+                
+                                
+            #ส่วนตกแต่ง วาดกรอบและชื่อ
                 label = "{} [{:.2f}%]".format(CLASSES[class_index], percent*100)
                 cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[class_index], 2)
                 cv2.rectangle(frame, (startX-1, startY-30), (endX+1, startY), COLORS[class_index], cv2.FILLED)
+                cv2.putText(frame,'stop',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,0,255),2)
                 y = startY - 15 if startY-15>15 else startY+15
                 cv2.putText(frame, label, (startX+20, y+5), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255,255,255), 1)
+                
+                
+                
+        
+        
 
     template=-1
     (template, top_left, scale, val) = GetSignSingle(frame)
 
     if template != -1:
+        
        
         res = cv2.matchTemplate(detest, trafficconeTemplate, cv2.TM_CCOEFF)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
@@ -217,14 +236,14 @@ while ret:
             elif safezone_val < 100 :
                 cv2.putText(frame,'Turn_Right',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,255),2)
                 turn_right()
-            # elif ret :
+            # elif percent > 0.5 :
             #     cv2.putText(copyimg,'stop',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,255),2)
             #     stop()
             else :
                 cv2.putText(frame,'Direct',(20,450),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(23,55,255),2)
                 print("direct")
-
-
+                
+        
             print(center_match)
             print(img[center_match[0], center_match[1]])
 
@@ -236,12 +255,18 @@ while ret:
             elif safezone_val < 100 :
                 cv2.putText(copyimg,'Turn_Right',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,255),2)
                 turn_right()
-            # elif ret :
+            # elif percent > 0.5 :
             #     cv2.putText(copyimg,'stop',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,255),2)
             #     stop()
             else :
                 cv2.putText(copyimg,'Direct',(20,300),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,255),2)
                 print("direct")
+        
+        if ret :
+            cv2.putText(copyimg,'stop',(20,500),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(255,255,255),2)
+            stop()
+
+
 
     
         frame[center_match[0]:center_match[0]+10,center_match[1]:center_match[1]+10]=255
@@ -257,7 +282,11 @@ while ret:
     #     output.write(frame)
     
     cv2.imshow("Original",frame)
-    cv2.imshow("Img",copyimg)
+    # cv2.imshow("Img",copyimg)
+    
+    
+
+   
     
     ret, frame = cap.read()
     
@@ -267,6 +296,3 @@ while ret:
     #บันทึกวิดีโอ
 cap.release()
 cv2.destroyAllWindows
-
-
-
