@@ -1,4 +1,5 @@
 from array import array
+from re import A
 import cv2
 from cv2 import imshow
 import numpy as np
@@ -118,7 +119,7 @@ def GetSignSingle(imgframe):
 
 
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 img = cv2.imread(".\\image\\safezone_val3.png")
 img = cv2.cvtColor(img,cv2.COLOR_BGRA2GRAY)
 ret, frame = cap.read()
@@ -127,32 +128,7 @@ ret, frame = cap.read()
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # output = cv2.VideoWriter('newvideo7.mp4',fourcc,20.0,(640,480)) 
 
-# def detection_func():
-#     while True:
-# 	#เริ่มอ่านในแต่ละเฟรม
-#         ret, frame = cap.read()
-#         if ret:
-#             (h,w) = frame.shape[:2]
-#             #ทำpreprocessing
-#             blob = cv2.dnn.blobFromImage(frame, 0.007843, (300,300), 127.5)
-#             net.setInput(blob)
-#             #feedเข้าmodelพร้อมได้ผลลัพธ์ทั้งหมดเก็บมาในตัวแปร detections
-#             detections = net.forward()
 
-#             for i in np.arange(0, detections.shape[2]):
-#                 percent = detections[0,0,i,2]
-#                 #กรองเอาเฉพาะค่าpercentที่สูงกว่า0.5 เพิ่มลดได้ตามต้องการ
-#                 if percent > 0.5:
-#                     class_index = int(detections[0,0,i,1])
-#                     box = detections[0,0,i,3:7]*np.array([w,h,w,h])
-#                     (startX, startY, endX, endY) = box.astype("int")
-#                 #ส่วนตกแต่งสามารถลองแก้กันได้ วาดกรอบและชื่อ
-#                     label = "{} [{:.2f}%]".format(CLASSES[class_index], percent*100)
-#                     cv2.rectangle(frame, (startX, startY), (endX, endY), COLORS[class_index], 2)
-#                     cv2.rectangle(frame, (startX-1, startY-30), (endX+1, startY), COLORS[class_index], cv2.FILLED)
-#                     y = startY - 15 if startY-15>15 else startY+15
-#                     cv2.putText(frame, label, (startX+20, y+5), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255,255,255), 1)
-#         break
 
 hw,hh=(200,200)
 focus=(800,500)
@@ -187,15 +163,14 @@ while ret:
                 class_index = int(detections[0,0,i,1])
                 box = detections[0,0,i,3:7]*np.array([w,h,w,h])
                 (startX, startY, endX, endY) = box.astype("int")
-                
-                aruyo = frame[startX:endY, startY:endX]
-                
-                cv2.imshow("person",aruyo)
-                
+                # box.astype("int") == A
+
+                aruyo = (frame, (startX, startY), (endX, endY), COLORS[class_index], 2)
+                # aruyo = frame[A] 
                 # cv2.imshow(frame[box.astype("int")])
                 # cv2.imshow(frame(box.astype("int")))
                 # aruyo = frame[[startX, startY], [endX, endY]]
-                
+                # print(startX, startY, endX, endY)
                                 
             #ส่วนตกแต่ง วาดกรอบและชื่อ
                 label = "{} [{:.2f}%]".format(CLASSES[class_index], percent*100)
@@ -205,7 +180,7 @@ while ret:
                 y = startY - 15 if startY-15>15 else startY+15
                 cv2.putText(frame, label, (startX+20, y+5), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255,255,255), 1)
                 
-                
+            cv2.imshow("person",aruyo)
                 
         
         
@@ -282,7 +257,7 @@ while ret:
     #     output.write(frame)
     
     cv2.imshow("Original",frame)
-    # cv2.imshow("Img",copyimg)
+    cv2.imshow("Img",copyimg)
     
     
 
